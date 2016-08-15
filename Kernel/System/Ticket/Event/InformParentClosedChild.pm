@@ -104,11 +104,11 @@ sub Run {
             $ParentArticleID = $TicketObject->ArticleCreate(
                 TicketID       => $TicketID,
                 SenderType     => 'system',
-	        ArticleTypeID  => 11,   # note-report
+                ArticleTypeID  => 11,   # note-report
                 Subject        => "Child ticket closed: $TicketHook$TicketHookDivider$Ticket{TicketNumber}",
-		Body           => 'A child ticket has been closed, please check it.',
+                Body           => 'A child ticket has been closed, please check it.',
                 From           => 'root@localhost',
-		ContentType    => 'text/plain; charset=UTF-8',
+                ContentType    => 'text/plain; charset=UTF-8',
                 UserID         => 1,
                 HistoryType    => 'ChildClose',
                 HistoryComment => 'Child ticket closed.',
