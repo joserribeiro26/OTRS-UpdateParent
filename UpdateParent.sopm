@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<otrs_package version="1.1">
+    <Name>UpdateParent</Name>
+    <Version>5.0.1</Version>
+    <Framework>5.0.x</Framework>
+    <Vendor>BeOnUp</Vendor>
+    <URL>http://www.beonup.com.br/</URL>
+    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <ChangeLog Version="5.0.1" Date="2016-08-15 10:51:00">Added Hungarian translation and code cleanup.</ChangeLog>
+    <ChangeLog Version="5.0.0" Date="2016-07-18 11:18:00">First version</ChangeLog>
+    <Description Lang="en">Add article to parent ticket when closing a child.</Description>
+    <Description Lang="hu">Bejegyzés hozzáadása a szülőjegyhez egy gyermekjegy lezárásakor.</Description>
+    <Filelist>
+        <File Permission="644" Location="Kernel/Config/Files/UpdateParent.xml"/>
+        <File Permission="644" Location="Kernel/Language/hu_UpdateParent.pm"/>
+        <File Permission="644" Location="Kernel/Language/pt_BR_UpdateParent.pm"/>
+        <File Permission="644" Location="Kernel/System/Ticket/Event/InformParentClosedChild.pm"/>
+    </Filelist>
+    <IntroInstall Type="post" Lang="en" Title="Thank you!">
+        Thank you for choosing the BeOnUp UpdateParent modul!
+    </IntroInstall>
+    <IntroInstall Type="post" Lang="hu" Title="Köszönjük!">
+        Köszönjük, hogy a BeOnUp UpdateParent modulját választotta!
+    </IntroInstall>
+    <DatabaseInstall Type="pre">
+        <Insert Table="ticket_history_type">
+            <Data Key="name" Type="Quote">ChildClose</Data>
+            <Data Key="valid_id">1</Data>
+            <Data Key="create_by">1</Data>
+            <Data Key="create_time">current_timestamp</Data>
+            <Data Key="change_by">1</Data>
+            <Data Key="change_time">current_timestamp</Data>
+        </Insert>
+    </DatabaseInstall>
+</otrs_package>

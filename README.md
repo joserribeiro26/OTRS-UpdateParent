@@ -1,5 +1,4 @@
 # OTRS-UpdateParent
 
-Plugin OTRS para noticar chamado pai caso o filho seja encerrado.
-
+OTRS plugin to add new article to a parent ticket, if one of its children have closed.
 
