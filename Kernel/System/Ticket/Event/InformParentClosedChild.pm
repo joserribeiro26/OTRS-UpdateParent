@@ -1,4 +1,12 @@
-# Custom code contato@beonup.com.br ( Jose Junior )
+# --
+# Copyright (C) 2016 BeOnUP, https://beonup.com.br/
+# Copyright (C) 2016 Jose Junior, <contato@beonup.com.br>
+# --
+# This software comes with ABSOLUTELY NO WARRANTY. For details, see
+# the enclosed file COPYING for license information (AGPL). If you
+# did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
+# --
+
 package Kernel::System::Ticket::Event::InformParentClosedChild;
 
 use strict;
@@ -6,7 +14,7 @@ use warnings;
 
 our @ObjectDependencies = (
     'Kernel::System::Log',
-	'Kernel::Output::HTML::Layout',
+    'Kernel::Output::HTML::Layout',
     'Kernel::System::Ticket',
 );
 
@@ -22,7 +30,6 @@ sub new {
 
 sub Run {
     my ( $Self, %Param ) = @_;
-    my %GetParam;
 
     # check needed stuff
     for my $Argument (qw(Event Config)) {
@@ -35,6 +42,7 @@ sub Run {
             return;
         }
     }
+
     if ( !$Param{Data}->{TicketID} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
@@ -46,8 +54,15 @@ sub Run {
 
     return 1 if $Param{Event} eq 'HistoryAdd';
 
-    # get ticket object
+    # get needed objects
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
     my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+    my $LinkObject   = $Kernel::OM->Get('Kernel::System::LinkObject');
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
+    # get config options
+    my $TicketHook        = $ConfigObject->Get('Ticket::Hook');
+    my $TicketHookDivider = $ConfigObject->Get('Ticket::HookDivider');
 
     # get ticket data
     my %Ticket = $TicketObject->TicketGet(
@@ -66,52 +81,44 @@ sub Run {
     }
 
     # send request
+    my %LinkList = $LinkObject->LinkKeyListWithData(
+        Object1   => 'Ticket',
+        Key1      => $Param{Data}{TicketID},
+        Object2   => 'Ticket',
+        Type      => 'ParentChild',
+        Direction => 'Source',
+        State     => 'Valid',
+        UserID    => 1,
+    );
 
-     my $LinkObject = $Kernel::OM->Get('Kernel::System::LinkObject');
-     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-	 
-	 
-	  
-     my %LinkList = $LinkObject->LinkKeyListWithData(
-            Object1   => 'Ticket',
-            Key1      => $Param{Data}{TicketID},
-            Object2   => 'Ticket',
-            Type      => 'ParentChild',
-            Direction => 'Source',
-            State     => 'Valid',
-            UserID    => 1,
-         );
-         
-         # push article of child to parents
-       if (%LinkList) {
-         my $ParentArticleID = '';
-          for my $TicketID ( keys %LinkList ) {
-             # change the subject of note send to parent
-             my $ParentTicketNumber = $TicketObject->TicketNumberLookup(
+    # push article of child to parents
+    if (%LinkList) {
+        my $ParentArticleID = '';
+        for my $TicketID ( keys %LinkList ) {
+            my $ParentTicketNumber = $TicketObject->TicketNumberLookup(
                 TicketID => $TicketID,
-                UserID   =>  1,
-             );
-             $GetParam{Subject} = "Tarefa filho encerrada ID $Param{Data}{TicketID}";
-       
-             # create articke for a parent
-             $ParentArticleID = $TicketObject->ArticleCreate(
-                TicketID                        => $TicketID,
-                SenderType                      => 'agent',
-	        ArticleTypeID 			=> 1,
-		Body				=> "Uma atividade desse chamado foi encerrada, por favor verifique",
-                From                            => 'root@localhost',
-		ContentType     		=> 'text/plain; charset=ISO-8859-15',      # or optional Charset & MimeType
-                UserID                          => 1,
-                HistoryType                     => "StateUpdate",
-                HistoryComment                  => "chamado filho encerrado", 
-                %GetParam,
+                UserID   => 1,
+            );
+
+            # create article for the parent
+            $ParentArticleID = $TicketObject->ArticleCreate(
+                TicketID       => $TicketID,
+                SenderType     => 'system',
+	        ArticleTypeID  => 11,   # note-report
+                Subject        => "Child ticket closed: $TicketHook$TicketHookDivider$Ticket{TicketNumber}",
+		Body           => 'A child ticket has been closed, please check it.',
+                From           => 'root@localhost',
+		ContentType    => 'text/plain; charset=UTF-8',
+                UserID         => 1,
+                HistoryType    => 'ChildClose',
+                HistoryComment => 'Child ticket closed.',
              );
              
              if ( !$ParentArticleID ) {
-                return $LayoutObject->ErrorScreen();
+                 return $LayoutObject->ErrorScreen();
              }
-          }      
-	}
+         }
+    }
     return 1;
 }
 1;

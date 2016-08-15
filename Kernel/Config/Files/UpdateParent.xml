@@ -2,12 +2,22 @@
 <otrs_config version="1.0" init="Application">
     <ConfigItem Name="Ticket::EventModulePost###99-InformParentClosedChild" Required="0" Valid="1">
         <Description Translatable="1">Ticket event module to send automatically notification to parent.</Description>
-        <Group>BeOnUp Notification Parent</Group>
+        <Group>BeOnUp UpdateParent</Group>
         <SubGroup>Core::Ticket</SubGroup>
         <Setting>
             <Hash>
                 <Item Key="Module">Kernel::System::Ticket::Event::InformParentClosedChild</Item>
                 <Item Key="Event">(ArticleCreate|TicketStateUpdate)</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+    <ConfigItem Name="Ticket::Frontend::HistoryTypes###99-InformParentClosedChild" Required="0" Valid="1">
+        <Description Translatable="1">Controls how to display the ticket history entries as readable values.</Description>
+        <Group>BeOnUp UpdateParent</Group>
+        <SubGroup>Frontend::Agent::Ticket::ViewHistory</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="ChildClose" Translatable="1">Child ticket closed.</Item>
             </Hash>
         </Setting>
     </ConfigItem>
